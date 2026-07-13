@@ -55,10 +55,10 @@ Settings are saved in your browser only. The key is sent directly to OpenRouter 
 
 | Rewritten per job | Kept fixed |
 |-------------------|------------|
-| Professional Summary | Name, email, phone, location |
-| Experience bullet points | Education, certifications |
-| | Job titles, company names, dates |
-| | Skills (editable by you) |
+| Professional Title | Name, email, phone, location, links |
+| Professional Summary | Education, certifications |
+| Skills (categories & keywords) | Job titles, company names, dates |
+| Experience bullet points | |
 
 ---
 

@@ -37,7 +37,7 @@ export default function JobDescriptionPanel({
         <div>
           <h2>Job Description</h2>
           <p className="panel-desc">
-            Paste the JD — Gemini rewrites Summary & Experience bullets only.
+            Paste the JD — Gemini rewrites Title, Summary, Skills & Experience bullets.
           </p>
         </div>
         {justGenerated && <span className="status-pill status-generated">Tailored</span>}

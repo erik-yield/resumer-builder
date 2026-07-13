@@ -1,39 +1,5 @@
 import { flattenSkillsText } from './skills.js';
-
-const ATS_SYSTEM_PROMPT = `You are an expert ATS resume optimizer specializing in Workday parsing requirements.
-
-Your task: Tailor ONLY the Professional Summary and Work Experience bullet points to maximize keyword match with the job description.
-
-STRICT RULES — DO NOT CHANGE:
-- Name, email, phone, location
-- Education (school, degree, dates)
-- Certifications (names, dates)
-- Job titles, company names, employment dates
-- Years of experience references tied to fixed dates
-
-YOU MUST REWRITE:
-- Professional Summary (3-5 lines, front-load JD keywords)
-- Experience bullet points for each role (4-6 bullets per recent role, 3-4 for older roles)
-
-ATS OPTIMIZATION RULES:
-1. Mirror exact terms from the job description (e.g., "AWS", "Terraform", "Kubernetes", "CI/CD")
-2. Use bullet formula: [Action] + [Tool/Tech from JD] + [Scope] → [Quantified Impact]
-3. Include both acronyms and full forms when relevant (e.g., "AWS (Amazon Web Services)")
-4. Quantify achievements with %, $, time saved, users, scale where plausible based on existing content
-5. Front-load strongest keyword matches in summary and most recent 1-2 roles
-6. Context beats keyword stuffing — weave keywords into achievement bullets naturally
-7. Target 70%+ keyword overlap with the job description
-
-Return ONLY valid JSON with this exact structure:
-{
-  "summary": "rewritten professional summary",
-  "experience": [
-    {
-      "id": "same id from input",
-      "bullets": ["bullet 1", "bullet 2", ...]
-    }
-  ]
-}`;
+import { EUROPEAN_ATS_MASTER_PROMPT } from './masterPrompt.js';
 
 export async function generateTailoredContent(jobDescription, resume, settings) {
   const apiKey = settings.apiKey?.trim();
@@ -55,16 +21,24 @@ export async function generateTailoredContent(jobDescription, resume, settings) 
   const userPrompt = `JOB DESCRIPTION:
 ${jobDescription}
 
-CURRENT RESUME DATA TO TAILOR:
-Professional Summary: ${resume.summary}
+CANDIDATE BACKGROUND (fixed — do not change titles, companies, or dates):
+Name: ${resume.name}
+Location: ${resume.location}
+Professional Title (rewrite for JD): ${resume.professionalTitle || ''}
+
+Current Summary:
+${resume.summary}
+
+Current Skills:
+${flattenSkillsText(resume.skills)}
 
 Work Experience:
 ${JSON.stringify(experiencePayload, null, 2)}
 
-Skills (for keyword reference only — do NOT return skills in output):
-${flattenSkillsText(resume.skills)}
+Education: ${JSON.stringify(resume.education)}
+Certifications: ${JSON.stringify(resume.certifications)}
 
-Rewrite the summary and experience bullets for maximum Workday ATS ranking. Return JSON only.`;
+Apply the European ATS master rules. Tailor professionalTitle, summary, skills categories/items, and experience bullets for maximum ATS ranking against this job description. Return JSON only.`;
 
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -77,7 +51,7 @@ Rewrite the summary and experience bullets for maximum Workday ATS ranking. Retu
     body: JSON.stringify({
       model,
       messages: [
-        { role: 'system', content: ATS_SYSTEM_PROMPT },
+        { role: 'system', content: EUROPEAN_ATS_MASTER_PROMPT },
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.4,
@@ -113,8 +87,18 @@ Rewrite the summary and experience bullets for maximum Workday ATS ranking. Retu
     };
   });
 
+  const tailoredSkills = Array.isArray(parsed.skills) && parsed.skills.length
+    ? parsed.skills.map((skill, i) => ({
+        id: resume.skills[i]?.id || `skill-gen-${Date.now()}-${i}`,
+        category: skill.category || `Category ${i + 1}`,
+        items: skill.items || '',
+      }))
+    : resume.skills;
+
   return {
+    professionalTitle: parsed.professionalTitle || resume.professionalTitle || '',
     summary: parsed.summary || resume.summary,
+    skills: tailoredSkills,
     experience: tailoredExperience,
   };
 }

@@ -3,6 +3,11 @@ export const defaultResume = {
   email: 'your.email@example.com',
   phone: '(555) 123-4567',
   location: 'City, State',
+  links: [
+    { id: 'link-1', label: 'GitHub', url: 'https://github.com/username' },
+    { id: 'link-2', label: 'LinkedIn', url: 'https://linkedin.com/in/username' },
+  ],
+  professionalTitle: 'Senior Software Engineer | React, Node.js, AWS | Full-Stack Development',
   summary:
     'Experienced IT professional with a strong background in software development, cloud infrastructure, and agile delivery. Proven track record of building scalable systems and leading cross-functional teams to deliver high-impact solutions.',
   skills: [
@@ -100,6 +105,12 @@ export function loadResume() {
       if (parsed.skills?.length && typeof parsed.skills[0] === 'string') {
         parsed.skills = [{ id: 'skill-migrated', category: 'Technical Skills', items: parsed.skills.join(', ') }];
       }
+      if (!Array.isArray(parsed.links)) {
+        parsed.links = [];
+      }
+      if (!parsed.professionalTitle) {
+        parsed.professionalTitle = '';
+      }
       return parsed;
     }
   } catch {
@@ -115,7 +126,9 @@ export function saveResume(resume) {
 export function mergeTailoredContent(resume, tailored) {
   return {
     ...resume,
+    professionalTitle: tailored.professionalTitle ?? resume.professionalTitle,
     summary: tailored.summary,
+    skills: tailored.skills ?? resume.skills,
     experience: resume.experience.map((exp) => {
       const match = tailored.experience.find((e) => e.id === exp.id);
       return match ? { ...exp, bullets: match.bullets } : exp;

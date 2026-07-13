@@ -606,6 +606,46 @@ textarea::placeholder {
   margin-bottom: 8px;
 }
 
+.btn-remove {
+  background: transparent;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: var(--error);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-remove:hover {
+  background: var(--error-dim);
+  border-color: var(--error);
+}
+
+.btn-remove-inline {
+  color: var(--error);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.btn-remove-inline:hover:not(:disabled) {
+  background: var(--error-dim);
+  border-color: var(--error);
+}
+
+.section-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.section-clear-btn {
+  margin-bottom: 8px;
+}
+
 .row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -672,6 +712,13 @@ textarea::placeholder {
   margin-bottom: 4px;
 }
 
+.resume-title {
+  font-size: 11pt;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 6px;
+}
+
 .resume-contact {
   font-size: 10pt;
   color: #333;
@@ -725,6 +772,34 @@ textarea::placeholder {
 .cert-list {
   list-style: disc;
   padding-left: 18px;
+}
+
+.contact-links-section {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.contact-links-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.link-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.resume-contact a {
+  color: #1a56db;
+  text-decoration: none;
+}
+
+.resume-contact a:hover {
+  text-decoration: underline;
 }
 
 .skills-hint {

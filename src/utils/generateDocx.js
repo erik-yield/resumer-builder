@@ -11,6 +11,7 @@ import {
   WidthType,
 } from 'docx';
 import { getSkillColumns, normalizeSkills } from './skills.js';
+import { getContactLine } from './contact.js';
 
 const FONT = 'Arial';
 const BODY_SIZE = 22;
@@ -143,12 +144,14 @@ function buildSkillsSection(skills) {
 }
 
 export async function buildDocxBlob(resume) {
-  const contactParts = [resume.email, resume.phone, resume.location].filter(Boolean);
   const skillsSection = buildSkillsSection(normalizeSkills(resume.skills));
 
   const children = [
     textPara(resume.name, { size: NAME_SIZE, bold: true, center: true, after: 40 }),
-    textPara(contactParts.join(' | '), { center: true, after: 200 }),
+    ...(resume.professionalTitle
+      ? [textPara(resume.professionalTitle, { center: true, after: 80 })]
+      : []),
+    textPara(getContactLine(resume), { center: true, after: 200 }),
     sectionHeading('Professional Summary'),
     textPara(resume.summary),
     sectionHeading('Skills'),
