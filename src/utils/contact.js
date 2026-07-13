@@ -22,10 +22,10 @@ export function getContactDisplay(resume) {
 }
 
 export const LINK_PRESETS = [
-  { label: 'GitHub', icon: 'github', placeholder: 'https://github.com/username' },
-  { label: 'LinkedIn', icon: 'linkedin', placeholder: 'https://linkedin.com/in/username' },
-  { label: 'Portfolio', icon: 'website', placeholder: 'https://yourportfolio.com' },
-  { label: 'Website', icon: 'website', placeholder: 'https://example.com' },
+  { label: 'GitHub', icon: 'github',  'https://github.com/username' },
+  { label: 'LinkedIn', icon: 'linkedin',  'https://linkedin.com/in/username' },
+  { label: 'Portfolio', icon: 'website',  'https://yourportfolio.com' },
+  { label: 'Website', icon: 'website',  'https://example.com' },
 ];
 
 export function normalizeLinks(links) {
