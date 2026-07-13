@@ -6,18 +6,46 @@ export const defaultResume = {
   summary:
     'Experienced IT professional with a strong background in software development, cloud infrastructure, and agile delivery. Proven track record of building scalable systems and leading cross-functional teams to deliver high-impact solutions.',
   skills: [
-    'JavaScript',
-    'TypeScript',
-    'React',
-    'Node.js',
-    'Python',
-    'AWS',
-    'Docker',
-    'Kubernetes',
-    'CI/CD',
-    'Terraform',
-    'SQL',
-    'Git',
+    {
+      id: 'skill-1',
+      category: 'Frontend',
+      items: 'React, TypeScript, JavaScript, HTML5, CSS3, Sass, Next.js, Redux, Context API, Material-UI, Tailwind CSS',
+    },
+    {
+      id: 'skill-2',
+      category: 'Backend',
+      items: 'Node.js, Express, Fastify, NestJS, Prisma ORM, REST APIs, GraphQL, gRPC, OpenAPI, Postman, RBAC, JWT, OAuth2',
+    },
+    {
+      id: 'skill-3',
+      category: 'API & Architecture',
+      items: 'RESTful APIs, GraphQL, Microservices, Event-Driven Architecture, Serverless, API Gateway, OpenAPI/Swagger',
+    },
+    {
+      id: 'skill-4',
+      category: 'Database',
+      items: 'PostgreSQL, Redis, MongoDB, MySQL, PgBouncer, database schema design, indexing strategies, query optimization, partitioning',
+    },
+    {
+      id: 'skill-5',
+      category: 'DevOps & CI/CD',
+      items: 'GitHub Actions, Vercel, Docker, AWS ECS, AWS Lambda, AWS S3, AWS RDS, Terraform, Cloudflare, Datadog, Sentry, CircleCI',
+    },
+    {
+      id: 'skill-6',
+      category: 'Testing',
+      items: 'Jest, Vitest, React Testing Library, Playwright, Cypress, Pact, unit testing, integration testing, end-to-end testing',
+    },
+    {
+      id: 'skill-7',
+      category: 'Cloud & Hosting',
+      items: 'AWS (ECS, Lambda, S3, RDS), Vercel, Netlify, Cloudflare Workers, edge caching, serverless functions, preview environments',
+    },
+    {
+      id: 'skill-8',
+      category: 'Practices',
+      items: 'End-to-end feature ownership, 0-1 product development, MVP development, Agile, code review, pair programming, customer discovery, performance optimization, monitoring and alerting',
+    },
   ],
   experience: [
     {
@@ -67,7 +95,13 @@ export const defaultResume = {
 export function loadResume() {
   try {
     const saved = localStorage.getItem('resume-writer-data');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.skills?.length && typeof parsed.skills[0] === 'string') {
+        parsed.skills = [{ id: 'skill-migrated', category: 'Technical Skills', items: parsed.skills.join(', ') }];
+      }
+      return parsed;
+    }
   } catch {
     /* use default */
   }

@@ -727,6 +727,31 @@ textarea::placeholder {
   padding-left: 18px;
 }
 
+.skills-hint {
+  margin-bottom: 4px;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 28px;
+}
+
+.skills-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-category {
+  font-size: 10pt;
+  line-height: 1.45;
+}
+
+.skill-category strong {
+  font-weight: bold;
+}
+
 /* Inline editing in preview */
 .editable-block {
   position: relative;
@@ -1057,6 +1082,10 @@ textarea::placeholder {
 
   .resume-preview {
     padding: 28px 24px;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr;
   }
 
   .toast {

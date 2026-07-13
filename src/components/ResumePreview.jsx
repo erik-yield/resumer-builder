@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getSkillColumns, normalizeSkills } from '../utils/skills';
 
 function EditableBlock({ value, onSave, multiline = false, className = '' }) {
   const [editing, setEditing] = useState(false);
@@ -56,6 +57,9 @@ export default function ResumePreview({ resume, onChange }) {
     onChange({ ...resume, experience });
   };
 
+  const skillColumns = getSkillColumns(normalizeSkills(resume.skills));
+  const skillRowCount = Math.max(skillColumns.left.length, skillColumns.right.length);
+
   return (
     <div className="panel preview-panel">
       <div className="panel-top">
@@ -80,7 +84,23 @@ export default function ResumePreview({ resume, onChange }) {
 
         <section className="preview-section locked-section">
           <h3>Skills</h3>
-          <p>{resume.skills.join(' • ') || '—'}</p>
+          <div className="skills-grid">
+            <div className="skills-column">
+              {skillColumns.left.map((skill) => (
+                <div key={skill.id} className="skill-category">
+                  <strong>{skill.category}:</strong> {skill.items}
+                </div>
+              ))}
+            </div>
+            <div className="skills-column">
+              {skillColumns.right.map((skill) => (
+                <div key={skill.id} className="skill-category">
+                  <strong>{skill.category}:</strong> {skill.items}
+                </div>
+              ))}
+            </div>
+          </div>
+          {!skillRowCount && <p>—</p>}
         </section>
 
         <section className="preview-section">

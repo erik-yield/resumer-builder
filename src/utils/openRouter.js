@@ -1,3 +1,5 @@
+import { flattenSkillsText } from './skills.js';
+
 const ATS_SYSTEM_PROMPT = `You are an expert ATS resume optimizer specializing in Workday parsing requirements.
 
 Your task: Tailor ONLY the Professional Summary and Work Experience bullet points to maximize keyword match with the job description.
@@ -59,7 +61,8 @@ Professional Summary: ${resume.summary}
 Work Experience:
 ${JSON.stringify(experiencePayload, null, 2)}
 
-Skills (for keyword reference only — do NOT return skills in output): ${resume.skills.join(', ')}
+Skills (for keyword reference only — do NOT return skills in output):
+${flattenSkillsText(resume.skills)}
 
 Rewrite the summary and experience bullets for maximum Workday ATS ranking. Return JSON only.`;
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { hasSkills } from '../utils/skills';
 
 function Field({ label, value, onChange, multiline = false, rows = 3, placeholder, hint }) {
   return (
@@ -137,10 +138,33 @@ export default function ResumeEditor({ resume, onChange, onReset, resumeReady })
     });
   };
 
+  const addSkillCategory = () => {
+    onChange({
+      ...resume,
+      skills: [
+        ...resume.skills,
+        { id: `skill-${Date.now()}`, category: '', items: '' },
+      ],
+    });
+  };
+
+  const updateSkill = (index, field, value) => {
+    const skills = [...resume.skills];
+    skills[index] = { ...skills[index], [field]: value };
+    onChange({ ...resume, skills });
+  };
+
+  const removeSkill = (index) => {
+    onChange({
+      ...resume,
+      skills: resume.skills.filter((_, i) => i !== index),
+    });
+  };
+
   const tabStatus = {
     contact: Boolean(resume.name?.trim() && resume.email?.trim()),
     summary: Boolean(resume.summary?.trim()),
-    skills: resume.skills?.length > 0,
+    skills: hasSkills(resume.skills),
     experience: resume.experience?.some((e) => e.title && e.bullets?.some((b) => b.trim())),
     education: resume.education?.some((e) => e.degree && e.school),
     certs: resume.certifications?.length > 0,
@@ -208,19 +232,38 @@ export default function ResumeEditor({ resume, onChange, onReset, resumeReady })
         )}
 
         {tab === 'skills' && (
-          <Field
-            label="Skills (comma-separated)"
-            value={resume.skills.join(', ')}
-            onChange={(v) =>
-              update(
-                'skills',
-                v.split(',').map((s) => s.trim()).filter(Boolean)
-              )
-            }
-            multiline
-            rows={4}
-            hint="These stay fixed — add JD keywords here manually if needed"
-          />
+          <div className="stack">
+            <p className="field-hint skills-hint">
+              Add categories with comma-separated skills. They display in two columns on the resume.
+            </p>
+            {resume.skills.map((skill, i) => (
+              <div key={skill.id} className="card">
+                <div className="card-header">
+                  <strong>{skill.category || `Category ${i + 1}`}</strong>
+                  <button type="button" className="btn-icon" onClick={() => removeSkill(i)}>
+                    ×
+                  </button>
+                </div>
+                <Field
+                  label="Category"
+                  value={skill.category}
+                  onChange={(v) => updateSkill(i, 'category', v)}
+                  placeholder="Frontend"
+                />
+                <Field
+                  label="Skills (comma-separated)"
+                  value={skill.items}
+                  onChange={(v) => updateSkill(i, 'items', v)}
+                  multiline
+                  rows={3}
+                  placeholder="React, TypeScript, JavaScript, ..."
+                />
+              </div>
+            ))}
+            <button type="button" className="btn btn-ghost" onClick={addSkillCategory}>
+              + Add category
+            </button>
+          </div>
         )}
 
         {tab === 'experience' && (
