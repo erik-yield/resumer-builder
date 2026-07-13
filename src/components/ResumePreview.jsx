@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getSkillColumns, normalizeSkills } from '../utils/skills';
-import { getContactParts, normalizeLinks } from '../utils/contact';
+import ContactLine from './ContactLine';
 
 function EditableBlock({ value, onSave, multiline = false, className = '' }) {
   const [editing, setEditing] = useState(false);
@@ -60,8 +60,6 @@ export default function ResumePreview({ resume, onChange }) {
 
   const skillColumns = getSkillColumns(normalizeSkills(resume.skills));
   const skillRowCount = Math.max(skillColumns.left.length, skillColumns.right.length);
-  const contactParts = getContactParts(resume);
-  const contactLinks = normalizeLinks(resume.links);
 
   return (
     <div className="panel preview-panel">
@@ -78,26 +76,7 @@ export default function ResumePreview({ resume, onChange }) {
           {resume.professionalTitle && (
             <p className="resume-title">{resume.professionalTitle}</p>
           )}
-          <p className="resume-contact">
-            {contactParts.map((part, i) => {
-              const link = contactLinks.find((l) => part.includes(l.url?.trim()) || part.startsWith(`${l.label}:`));
-              if (link?.url?.trim()) {
-                return (
-                  <span key={i}>
-                    {i > 0 && ' | '}
-                    {link.label ? `${link.label}: ` : ''}
-                    <a href={link.url.trim()} target="_blank" rel="noreferrer">{link.url.trim()}</a>
-                  </span>
-                );
-              }
-              return (
-                <span key={i}>
-                  {i > 0 && ' | '}
-                  {part}
-                </span>
-              );
-            })}
-          </p>
+          <ContactLine resume={resume} />
         </header>
 
         <section className="preview-section editable-section">

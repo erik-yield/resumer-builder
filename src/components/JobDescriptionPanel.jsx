@@ -7,6 +7,8 @@ export default function JobDescriptionPanel({
   onGenerate,
   onDownload,
   onOpenSettings,
+  downloadFormat,
+  onDownloadFormatChange,
   loading,
   lastFilename,
   error,
@@ -106,6 +108,26 @@ export default function JobDescriptionPanel({
       />
 
       <div className="action-bar">
+        <div className="format-row">
+          <span className="format-label">Download format</span>
+          <div className="format-toggle">
+            <button
+              type="button"
+              className={downloadFormat === 'docx' ? 'active' : ''}
+              onClick={() => onDownloadFormatChange('docx')}
+            >
+              .docx
+            </button>
+            <button
+              type="button"
+              className={downloadFormat === 'pdf' ? 'active' : ''}
+              onClick={() => onDownloadFormatChange('pdf')}
+            >
+              .pdf
+            </button>
+          </div>
+        </div>
+
         <div className="action-row">
           <button
             type="button"
@@ -113,10 +135,10 @@ export default function JobDescriptionPanel({
             onClick={onGenerate}
             disabled={loading || !jobDescription.trim() || !apiReady}
           >
-            {loading ? 'Working…' : 'Generate ATS Resume'}
+            {loading ? 'Working…' : `Generate & Download .${downloadFormat}`}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onDownload} disabled={loading}>
-            Download .docx
+            Download .{downloadFormat}
           </button>
           {canUndo && (
             <button type="button" className="btn btn-secondary" onClick={onUndo} disabled={loading}>
@@ -124,7 +146,7 @@ export default function JobDescriptionPanel({
             </button>
           )}
         </div>
-        <span className="shortcut-hint">Ctrl + Enter to generate</span>
+        <span className="shortcut-hint">Ctrl + Enter to generate · Format saved until you change it</span>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}

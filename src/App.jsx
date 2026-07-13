@@ -9,7 +9,8 @@ import SettingsModal from './components/SettingsModal';
 import { loadResume, saveResume, mergeTailoredContent, defaultResume } from './data/defaultResume';
 import { loadSettings, saveSettings, isApiReady } from './utils/settings';
 import { generateTailoredContent } from './utils/openRouter';
-import { buildDocxBlob, downloadDocxBlob } from './utils/generateDocx';
+import { exportResume } from './utils/exportResume';
+import { loadDownloadFormat, saveDownloadFormat } from './utils/download';
 import { isResumeReady, extractJobTitle, saveJdToHistory } from './utils/helpers';
 import './App.css';
 
@@ -27,6 +28,7 @@ export default function App() {
   const [justGenerated, setJustGenerated] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeView, setActiveView] = useState('split');
+  const [downloadFormat, setDownloadFormat] = useState(loadDownloadFormat);
   const previewRef = useRef(null);
   const isFirstSave = useRef(true);
 
@@ -74,15 +76,15 @@ export default function App() {
 
   const downloadResume = useCallback(async (resumeData) => {
     const jobTitle = extractJobTitle(jobDescription);
-    const safeTitle = jobTitle.replace(/[^a-zA-Z0-9\s-_]/g, '').trim().replace(/\s+/g, '_').slice(0, 50) || 'Resume';
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `Resume_${safeTitle}_${timestamp}.docx`;
-
-    const blob = await buildDocxBlob(resumeData);
-    downloadDocxBlob(blob, filename);
+    const filename = await exportResume(resumeData, jobTitle, downloadFormat);
     setLastFilename(filename);
     return filename;
-  }, [jobDescription]);
+  }, [jobDescription, downloadFormat]);
+
+  const handleDownloadFormatChange = (format) => {
+    setDownloadFormat(format);
+    saveDownloadFormat(format);
+  };
 
   const handleGenerate = useCallback(async () => {
     if (!apiReady) {
@@ -241,6 +243,8 @@ export default function App() {
             onGenerate={handleGenerate}
             onDownload={handleDownload}
             onOpenSettings={() => setShowSettings(true)}
+            downloadFormat={downloadFormat}
+            onDownloadFormatChange={handleDownloadFormatChange}
             loading={loading}
             lastFilename={lastFilename}
             error={error}

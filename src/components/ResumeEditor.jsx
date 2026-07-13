@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { hasSkills } from '../utils/skills';
-import { LINK_PRESETS, normalizeLinks } from '../utils/contact';
+import { LINK_PRESETS, normalizeLinks, getLinkIconType } from '../utils/contact';
+import SocialIcon from './SocialIcon';
 
 function Field({ label, value, onChange, multiline = false, rows = 3, placeholder, hint }) {
   return (
@@ -333,14 +334,20 @@ export default function ResumeEditor({ resume, onChange, onReset, resumeReady })
                     <button
                       key={preset.label}
                       type="button"
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-ghost btn-sm link-preset-btn"
                       onClick={() => addLink(preset)}
+                      title={`Add ${preset.label}`}
                     >
-                      + {preset.label}
+                      <SocialIcon type={preset.icon || getLinkIconType(preset)} size={14} />
                     </button>
                   ))}
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => addLink()}>
-                    + Custom
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm link-preset-btn"
+                    onClick={() => addLink()}
+                    title="Add custom link"
+                  >
+                    <SocialIcon type="link" size={14} />
                   </button>
                   {(resume.links || []).length > 0 && (
                     <button type="button" className="btn btn-ghost btn-sm btn-remove-inline" onClick={clearLinks}>
@@ -358,7 +365,12 @@ export default function ResumeEditor({ resume, onChange, onReset, resumeReady })
                 {(resume.links || []).map((link, i) => (
                   <SectionCard
                     key={link.id}
-                    title={link.label || `Link ${i + 1}`}
+                    title={
+                      <span className="link-card-title">
+                        <SocialIcon type={getLinkIconType(link)} size={14} />
+                        {link.label || `Link ${i + 1}`}
+                      </span>
+                    }
                     onRemove={() => removeLink(i)}
                   >
                     <Field

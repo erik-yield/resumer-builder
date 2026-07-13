@@ -217,3 +217,5 @@ export function downloadDocxBlob(blob, filename) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// Re-export for backward compatibility — prefer exportResume from exportResume.js

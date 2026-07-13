@@ -2,7 +2,7 @@ const STEPS = [
   'Analyzing job description…',
   'Extracting ATS keywords…',
   'Rewriting summary & bullets…',
-  'Building Workday .docx…',
+  'Building resume file…',
 ];
 
 export default function LoadingOverlay({ phase }) {

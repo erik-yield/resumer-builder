@@ -527,6 +527,50 @@ textarea::placeholder {
   cursor: not-allowed;
 }
 
+.format-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.format-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.format-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.format-toggle button {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.format-toggle button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.format-toggle button:hover:not(.active) {
+  color: var(--text);
+}
+
 .action-bar {
   margin-top: 16px;
   padding-top: 16px;
@@ -791,6 +835,70 @@ textarea::placeholder {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-items: center;
+}
+
+.link-preset-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0 !important;
+  border-style: solid !important;
+}
+
+.link-card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.social-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.contact-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: middle;
+}
+
+.contact-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  text-decoration: none;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.contact-icon-link:hover {
+  color: #1a56db;
+  transform: translateY(-1px);
+}
+
+.resume-preview .contact-icon-link {
+  color: #333;
+}
+
+.resume-preview .contact-icon-link:hover {
+  color: #1a56db;
+}
+
+.contact-sep {
+  color: inherit;
 }
 
 .resume-contact a {
