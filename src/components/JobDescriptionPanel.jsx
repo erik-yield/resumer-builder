@@ -6,14 +6,16 @@ export default function JobDescriptionPanel({
   onJobDescriptionChange,
   onGenerate,
   onDownload,
+  onOpenSettings,
   loading,
-  savedPath,
+  lastFilename,
   error,
   apiReady,
   resumeReady,
   onUndo,
   canUndo,
   justGenerated,
+  modelName,
 }) {
   const [showHistory, setShowHistory] = useState(false);
   const history = loadJdHistory();
@@ -27,10 +29,6 @@ export default function JobDescriptionPanel({
     } catch {
       /* clipboard denied */
     }
-  };
-
-  const copyPath = () => {
-    if (savedPath) navigator.clipboard.writeText(savedPath);
   };
 
   return (
@@ -47,7 +45,13 @@ export default function JobDescriptionPanel({
 
       {!apiReady && (
         <div className="alert alert-warn">
-          Add <code>OPENROUTER_API_KEY</code> to <code>.env</code> and restart the server.
+          Open <button type="button" className="link-btn" onClick={onOpenSettings}>Settings</button> and add your OpenRouter API key.
+        </div>
+      )}
+
+      {apiReady && (
+        <div className="model-badge">
+          Model: <code>{modelName}</code>
         </div>
       )}
 
@@ -125,12 +129,9 @@ export default function JobDescriptionPanel({
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      {savedPath && (
+      {lastFilename && (
         <div className="alert alert-success">
-          <span>Saved to Downloads: <code>{savedPath}</code></span>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={copyPath}>
-            Copy path
-          </button>
+          Downloaded: <code>{lastFilename}</code>
         </div>
       )}
     </div>

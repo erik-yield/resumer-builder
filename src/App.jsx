@@ -5,19 +5,23 @@ import ResumePreview from './components/ResumePreview';
 import StepIndicator from './components/StepIndicator';
 import Toast from './components/Toast';
 import LoadingOverlay from './components/LoadingOverlay';
+import SettingsModal from './components/SettingsModal';
 import { loadResume, saveResume, mergeTailoredContent, defaultResume } from './data/defaultResume';
-import { apiGet, apiPost } from './utils/api';
+import { loadSettings, saveSettings, isApiReady } from './utils/settings';
+import { generateTailoredContent } from './utils/openRouter';
+import { buildDocxBlob, downloadDocxBlob } from './utils/generateDocx';
 import { isResumeReady, extractJobTitle, saveJdToHistory } from './utils/helpers';
 import './App.css';
 
 export default function App() {
   const [resume, setResume] = useState(loadResume);
+  const [settings, setSettings] = useState(loadSettings);
+  const [showSettings, setShowSettings] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingPhase, setLoadingPhase] = useState(0);
   const [error, setError] = useState('');
-  const [savedPath, setSavedPath] = useState('');
-  const [apiReady, setApiReady] = useState(false);
+  const [lastFilename, setLastFilename] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
   const [previousResume, setPreviousResume] = useState(null);
   const [justGenerated, setJustGenerated] = useState(false);
@@ -26,6 +30,7 @@ export default function App() {
   const previewRef = useRef(null);
   const isFirstSave = useRef(true);
 
+  const apiReady = isApiReady(settings);
   const resumeReady = isResumeReady(resume);
   const jdReady = jobDescription.trim().length > 80;
   const currentStep = justGenerated ? 3 : jdReady ? 2 : resumeReady ? 2 : 1;
@@ -42,19 +47,22 @@ export default function App() {
   }, [resume]);
 
   useEffect(() => {
-    apiGet('/api/health')
-      .then((r) => r.json())
-      .then((d) => setApiReady(d.hasApiKey))
-      .catch(() => setApiReady(false));
+    if (!apiReady) setShowSettings(true);
   }, []);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
   }, []);
 
+  const handleSettingsSave = (next) => {
+    setSettings(next);
+    saveSettings(next);
+    showToast('Settings saved');
+  };
+
   const handleResumeChange = useCallback((updated) => {
     setResume(updated);
-    setSavedPath('');
+    setLastFilename('');
     setJustGenerated(false);
   }, []);
 
@@ -66,32 +74,23 @@ export default function App() {
 
   const downloadResume = useCallback(async (resumeData) => {
     const jobTitle = extractJobTitle(jobDescription);
-    const res = await apiPost('/api/download', { resume: resumeData, jobTitle });
+    const safeTitle = jobTitle.replace(/[^a-zA-Z0-9\s-_]/g, '').trim().replace(/\s+/g, '_').slice(0, 50) || 'Resume';
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `Resume_${safeTitle}_${timestamp}.docx`;
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || 'Download failed');
-    }
-
-    const saved = res.headers.get('X-Saved-Path');
-    if (saved) setSavedPath(saved);
-
-    const blob = await res.blob();
-    const disposition = res.headers.get('Content-Disposition') || '';
-    const match = disposition.match(/filename="(.+)"/);
-    const filename = match?.[1] || `Resume_${jobTitle.replace(/\s+/g, '_')}.docx`;
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-
+    const blob = await buildDocxBlob(resumeData);
+    downloadDocxBlob(blob, filename);
+    setLastFilename(filename);
     return filename;
   }, [jobDescription]);
 
   const handleGenerate = useCallback(async () => {
+    if (!apiReady) {
+      setShowSettings(true);
+      setError('Add your OpenRouter API key in Settings.');
+      showToast('Add your API key in Settings', 'error');
+      return;
+    }
     if (!resumeReady) {
       setError('Fill in your name, email, and at least one experience role with bullets.');
       showToast('Complete your base resume first', 'error');
@@ -105,16 +104,14 @@ export default function App() {
     setLoading(true);
     setLoadingPhase(0);
     setError('');
-    setSavedPath('');
+    setLastFilename('');
     setPreviousResume(structuredClone(resume));
 
     try {
       await advanceLoading(0, 600);
       await advanceLoading(1, 800);
 
-      const res = await apiPost('/api/tailor', { jobDescription, resume });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Generation failed');
+      const data = await generateTailoredContent(jobDescription, resume, settings);
 
       await advanceLoading(2, 500);
       const tailored = mergeTailoredContent(resume, data);
@@ -125,7 +122,7 @@ export default function App() {
       await advanceLoading(3, 400);
       const filename = await downloadResume(tailored);
 
-      showToast(`Resume saved as ${filename}`);
+      showToast(`Downloaded ${filename}`);
       previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
       setError(err.message);
@@ -134,7 +131,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [resumeReady, jdReady, jobDescription, resume, downloadResume, showToast]);
+  }, [apiReady, resumeReady, jdReady, jobDescription, resume, settings, downloadResume, showToast]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -149,7 +146,7 @@ export default function App() {
 
   const handleDownload = async () => {
     setError('');
-    setSavedPath('');
+    setLastFilename('');
     setLoading(true);
     setLoadingPhase(3);
     try {
@@ -187,6 +184,13 @@ export default function App() {
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
+      {showSettings && (
+        <SettingsModal
+          settings={settings}
+          onSave={handleSettingsSave}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
 
       <header className="app-header">
         <div>
@@ -195,6 +199,13 @@ export default function App() {
         </div>
         <div className="header-actions">
           {savedFlash && <span className="save-badge">Saved</span>}
+          <button
+            type="button"
+            className={`btn btn-secondary btn-sm ${!apiReady ? 'btn-attention' : ''}`}
+            onClick={() => setShowSettings(true)}
+          >
+            Settings
+          </button>
           <div className="header-badge">Workday · .docx</div>
         </div>
       </header>
@@ -202,25 +213,13 @@ export default function App() {
       <StepIndicator step={currentStep} resumeReady={resumeReady} jdReady={jdReady} />
 
       <div className="view-toggle">
-        <button
-          type="button"
-          className={activeView === 'edit' ? 'active' : ''}
-          onClick={() => setActiveView('edit')}
-        >
+        <button type="button" className={activeView === 'edit' ? 'active' : ''} onClick={() => setActiveView('edit')}>
           Edit
         </button>
-        <button
-          type="button"
-          className={activeView === 'split' ? 'active' : ''}
-          onClick={() => setActiveView('split')}
-        >
+        <button type="button" className={activeView === 'split' ? 'active' : ''} onClick={() => setActiveView('split')}>
           Split
         </button>
-        <button
-          type="button"
-          className={activeView === 'preview' ? 'active' : ''}
-          onClick={() => setActiveView('preview')}
-        >
+        <button type="button" className={activeView === 'preview' ? 'active' : ''} onClick={() => setActiveView('preview')}>
           Preview
         </button>
       </div>
@@ -241,14 +240,16 @@ export default function App() {
             }}
             onGenerate={handleGenerate}
             onDownload={handleDownload}
+            onOpenSettings={() => setShowSettings(true)}
             loading={loading}
-            savedPath={savedPath}
+            lastFilename={lastFilename}
             error={error}
             apiReady={apiReady}
             resumeReady={resumeReady}
             onUndo={handleUndo}
             canUndo={Boolean(previousResume)}
             justGenerated={justGenerated}
+            modelName={settings.model}
           />
         </div>
         <div className="column-preview" ref={previewRef}>
