@@ -27,7 +27,6 @@ export default function App() {
   const [previousResume, setPreviousResume] = useState(null);
   const [justGenerated, setJustGenerated] = useState(false);
   const [toast, setToast] = useState(null);
-  const [activeView, setActiveView] = useState('split');
   const [downloadFormat, setDownloadFormat] = useState(loadDownloadFormat);
   const previewRef = useRef(null);
   const isFirstSave = useRef(true);
@@ -214,19 +213,7 @@ export default function App() {
 
       <StepIndicator step={currentStep} resumeReady={resumeReady} jdReady={jdReady} />
 
-      <div className="view-toggle">
-        <button type="button" className={activeView === 'edit' ? 'active' : ''} onClick={() => setActiveView('edit')}>
-          Edit
-        </button>
-        <button type="button" className={activeView === 'split' ? 'active' : ''} onClick={() => setActiveView('split')}>
-          Split
-        </button>
-        <button type="button" className={activeView === 'preview' ? 'active' : ''} onClick={() => setActiveView('preview')}>
-          Preview
-        </button>
-      </div>
-
-      <main className={`app-grid view-${activeView}`}>
+      <main className="app-grid view-split">
         <div className="column-edit">
           <ResumeEditor
             resume={resume}

@@ -31,7 +31,7 @@ function SectionCard({ title, onRemove, children }) {
   return (
     <div className="card">
       <div className="card-header">
-        <strong>{title}</strong>
+        <div className="card-title">{title}</div>
         {onRemove && (
           <button type="button" className="btn-remove" onClick={onRemove}>
             Remove
@@ -358,32 +358,24 @@ export default function ResumeEditor({ resume, onChange, onReset, resumeReady })
               </div>
 
               {normalizeLinks(resume.links).length === 0 && (
-                <p className="field-hint">Add GitHub, LinkedIn, portfolio, or any custom link.</p>
+                <p className="field-hint">Click an icon above to add a social link.</p>
               )}
 
               <div className="stack">
                 {(resume.links || []).map((link, i) => (
                   <SectionCard
                     key={link.id}
-                    title={
-                      <span className="link-card-title">
-                        <SocialIcon type={getLinkIconType(link)} size={14} />
-                        {link.label || `Link ${i + 1}`}
-                      </span>
-                    }
+                    title={<SocialIcon type={getLinkIconType(link)} size={16} />}
                     onRemove={() => removeLink(i)}
                   >
-                    <Field
-                      label="Label"
-                      value={link.label}
-                      onChange={(v) => updateLink(i, 'label', v)}
-                      placeholder="GitHub"
-                    />
                     <Field
                       label="URL"
                       value={link.url}
                       onChange={(v) => updateLink(i, 'url', v)}
-                      placeholder="https://github.com/username"
+                      placeholder={
+                        LINK_PRESETS.find((p) => p.label === link.label)?.placeholder
+                        || 'https://github.com/username'
+                      }
                     />
                   </SectionCard>
                 ))}

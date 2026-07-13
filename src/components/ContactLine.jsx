@@ -31,8 +31,8 @@ export default function ContactLine({ resume, iconSize = 15 }) {
               target="_blank"
               rel="noreferrer"
               className="contact-icon-link"
-              title={link.label ? `${link.label}: ${link.url}` : link.url}
-              aria-label={link.label || link.url}
+              title={link.url}
+              aria-label={link.url}
             >
               <SocialIcon type={type} size={iconSize} />
             </a>
