@@ -7,8 +7,8 @@ import Toast from './components/Toast';
 import LoadingOverlay from './components/LoadingOverlay';
 import SettingsModal from './components/SettingsModal';
 import { loadResume, saveResume, mergeTailoredContent, defaultResume } from './data/defaultResume';
-import { loadSettings, saveSettings, isApiReady } from './utils/settings';
-import { generateTailoredContent } from './utils/openRouter';
+import { loadSettings, saveSettings, isApiReady, getActiveModel, getProviderLabel } from './utils/settings';
+import { generateTailoredContent } from './utils/llm';
 import { exportResume } from './utils/exportResume';
 import { loadDownloadFormat, saveDownloadFormat } from './utils/download';
 import { isResumeReady, extractJobTitle, saveJdToHistory } from './utils/helpers';
@@ -88,7 +88,7 @@ export default function App() {
   const handleGenerate = useCallback(async () => {
     if (!apiReady) {
       setShowSettings(true);
-      setError('Add your OpenRouter API key in Settings.');
+      setError(`Add your ${getProviderLabel(settings.provider)} API key in Settings.`);
       showToast('Add your API key in Settings', 'error');
       return;
     }
@@ -240,7 +240,8 @@ export default function App() {
             onUndo={handleUndo}
             canUndo={Boolean(previousResume)}
             justGenerated={justGenerated}
-            modelName={settings.model}
+            modelName={getActiveModel(settings)}
+            providerLabel={getProviderLabel(settings.provider)}
           />
         </div>
         <div className="column-preview" ref={previewRef}>

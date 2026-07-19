@@ -18,6 +18,7 @@ export default function JobDescriptionPanel({
   canUndo,
   justGenerated,
   modelName,
+  providerLabel = 'OpenRouter',
 }) {
   const [showHistory, setShowHistory] = useState(false);
   const history = loadJdHistory();
@@ -47,13 +48,13 @@ export default function JobDescriptionPanel({
 
       {!apiReady && (
         <div className="alert alert-warn">
-          Open <button type="button" className="link-btn" onClick={onOpenSettings}>Settings</button> and add your OpenRouter API key.
+          Open <button type="button" className="link-btn" onClick={onOpenSettings}>Settings</button> and add your {providerLabel} API key.
         </div>
       )}
 
       {apiReady && (
         <div className="model-badge">
-          Model: <code>{modelName}</code>
+          {providerLabel}: <code>{modelName}</code>
         </div>
       )}
 
